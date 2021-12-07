@@ -103,6 +103,21 @@ def _filename(f_name):
 	# noinspection PyBroadException
 	try:
 		ret = pathvalidate.sanitize_filename(ret, '_').strip(' ./\\')
+
+		# Sanitize more - remove spaces, quotes, some other punctuation, and non-ASCII characters (mainly targetting emojis, but its okay to hit umlats and stuff)
+		ret = ret.replace(" ", "")
+		ret = ret.encode('ascii', errors='ignore')
+		ret = ret.decode('utf-8')
+		for char in "!@#$%^&*()[]{};:,.<>?\/|`~-=+":		# Do not remove underscores!
+			ret = ret.replace(char, "")
+
+		# Limit character count
+		nMax = 100
+		if len(ret) > nMax:
+			ret = ret[:nMax]
+
+		ret = str(ret)
+
 	except Exception:
 		ret = '_'
 	if len(ret) == 0:
